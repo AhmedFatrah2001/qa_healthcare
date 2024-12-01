@@ -11,7 +11,7 @@ env/
 *.env
 
 
-question_embeddings.npy
+combined_question_embeddings.npy
 
 .DS_Store
 Thumbs.db

@@ -1,13 +1,14 @@
 
 # Medical QA Server
 
-A simple Flask-based server that provides answers to medical questions using Sentence-BERT for semantic search. This project includes functionality to precompute and save question embeddings for faster response times.
+A Flask-based server that provides answers to medical questions using combined embeddings from two Sentence-BERT models: `all-MiniLM-L6-v2` (general-purpose) and `BioBERT` (domain-specific for biomedical texts). This approach enhances the accuracy of semantic search by leveraging complementary strengths of the models.
 
 ## Features
 
-- Precomputes and saves embeddings for predefined questions.
-- Flask API endpoint to answer questions.
-- Uses Sentence-BERT (`all-MiniLM-L6-v2`) for efficient semantic similarity.
+- Combines embeddings from `all-MiniLM-L6-v2` and `BioBERT` for richer semantic representations.
+- Precomputes and saves combined embeddings for predefined questions to ensure fast response times.
+- Flask API endpoint to answer questions dynamically.
+- Ideal for medical-related query answering systems.
 
 ---
 
@@ -35,12 +36,12 @@ A simple Flask-based server that provides answers to medical questions using Sen
    - `question`: Predefined medical questions.
    - `answer`: Corresponding answers to the questions.
 
-4. **Precompute and Save Embeddings**
-   Run the `save_embd.py` script to precompute and save the question embeddings:
+4. **Precompute and Save Combined Embeddings**
+   Run the `save_embd.py` script to precompute and save the combined embeddings:
    ```bash
    python save_embd.py
    ```
-   This will create a `question_embeddings.npy` file in the root directory.
+   This will create a `combined_question_embeddings.npy` file in the root directory.
 
 5. **Run the Server**
    Start the Flask server by running `main.py`:
@@ -77,17 +78,37 @@ curl -X POST http://127.0.0.1:5000/get_answer -H "Content-Type: application/json
 
 ---
 
+## How It Works
+
+### Combined Embeddings
+1. **Precomputation**:
+   - During precomputation, embeddings are generated using two models:
+     - `all-MiniLM-L6-v2`: A general-purpose Sentence-BERT model.
+     - `BioBERT`: A biomedical domain-specific model.
+   - The embeddings from both models are **concatenated** to form a richer representation for each question.
+
+2. **Similarity Search**:
+   - During inference, the input question is encoded using both models, and the embeddings are concatenated.
+   - Similarity is calculated using the dot product between the input embedding and the precomputed combined embeddings.
+
+### Why Combine Models?
+- `all-MiniLM-L6-v2` captures general linguistic nuances.
+- `BioBERT` specializes in biomedical vocabulary, making it more effective for domain-specific queries.
+- Combining them ensures that both general and domain-specific information are considered.
+
+---
+
 ## File Structure
 
 ```
 .
-├── main.py              # Flask server with question-answering logic
-├── save_embd.py         # Script to precompute and save question embeddings
-├── medical_qa_dataset.csv # Dataset of predefined questions and answers
-├── question_embeddings.npy # Precomputed question embeddings (created after running save_embd.py)
-├── requirements.txt     # List of Python dependencies
-├── README.md            # Project documentation
-└── .gitignore           # Files to ignore in version control
+├── main.py                      # Flask server with question-answering logic
+├── save_embd.py                 # Script to precompute and save combined question embeddings
+├── medical_qa_dataset.csv       # Dataset of predefined questions and answers
+├── combined_question_embeddings.npy # Precomputed combined embeddings (created after running save_embd.py)
+├── requirements.txt             # List of Python dependencies
+├── README.md                    # Project documentation
+└── .gitignore                   # Files to ignore in version control
 ```
 
 ---
@@ -111,4 +132,4 @@ sentence-transformers
 
 ## License
 
-This project is open-source
+This project is open-source and free to use.
